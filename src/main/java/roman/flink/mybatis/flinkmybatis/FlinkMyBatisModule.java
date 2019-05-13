@@ -16,6 +16,7 @@ import org.mybatis.guice.provision.KeyMatcher;
 import tk.mybatis.mapper.mapperhelper.MapperHelper;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -24,8 +25,10 @@ import static com.google.common.reflect.ClassPath.ClassInfo;
 import static com.google.common.reflect.ClassPath.from;
 import static com.google.inject.util.Providers.guicify;
 import static roman.flink.mybatis.common.util.Preconditions.checkArgument;
+import static roman.flink.mybatis.flinkmybatis.DataSourceProperties.MAPPER_PACKAGE;
 
 public abstract class FlinkMyBatisModule extends MyBatisModule {
+
 
     @Override
     protected void initialize() {
@@ -34,14 +37,17 @@ public abstract class FlinkMyBatisModule extends MyBatisModule {
 
         bindDao();
 
-        Names.bindProperties(binder(), new DataSourceProperties());
+        DataSourceProperties dataSourceProperties = new DataSourceProperties();
+        Names.bindProperties(binder(), dataSourceProperties);
         //绑定我们自定义的数据源provider，也可以使用guice已经编写好的
         bindDataSourceProviderType(DruidDataSourceProvider.class);
         bindTransactionFactoryType(JdbcTransactionFactory.class);
         addInterceptorClass(PageInterceptor.class);
 
         //添加我们的mapper接口，可以按类注入（即通过类名注入），也可以指定整个包的路径
-        addTkMapperClasses("roman.flink.mybatis.dao.repository");
+        String[] packages = dataSourceProperties.getProperty(MAPPER_PACKAGE).split(",");
+        Arrays.stream(packages).forEach(this::addTkMapperClasses);
+
     }
 
     protected abstract void bindDao();

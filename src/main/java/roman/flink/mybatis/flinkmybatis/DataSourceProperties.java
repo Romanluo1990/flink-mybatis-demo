@@ -34,12 +34,15 @@ public class DataSourceProperties extends Properties {
 
     private static final String MYBATIS_ENVIRONMENT_ID = "mybatis.environment.id";
 
+    public static final String MAPPER_PACKAGE = "mybatis.mapper.package";
+
     public DataSourceProperties() {
         initProperties();
     }
 
     private void initProperties() {
         setProperty(MYBATIS_ENVIRONMENT_ID, PropertiesManager.getString(MYBATIS_ENVIRONMENT_ID));
+        setProperty(MAPPER_PACKAGE, PropertiesManager.getString(MAPPER_PACKAGE));
         Method[] methods = DruidDataSourceProvider.class.getMethods();
         Arrays.stream(methods).forEach(method -> {
             Annotation[][] parameterAnnotations = method.getParameterAnnotations();
